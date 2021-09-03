@@ -4,15 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'utilities.dart';
 
-const metfcstHost = "opendata-download-metfcst.smhi.se";
+const String metfcstHost = "opendata-download-metfcst.smhi.se";
 
 /// Meteorological Forecasts
 class MeteorologicalForecasts {
   late final Category category;
   late final Version version;
-  List<GeoPoint> _points;
-
-  //TODO: setter _points & getter
+  List<GeoPoint>? points;
 
   MeteorologicalForecasts({
     required this.category,
@@ -21,41 +19,32 @@ class MeteorologicalForecasts {
 
   ///The current forecast approved time (the time the forecast latest was updated)
   Future<DateTime?> get approvedTime async {
-    try {
-      http.Response response = await http
+      final http.Response response = await http
           .get(constructSmhiUri(metfcstHost, category, version, ["approvedtime.json"]), headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
       if (response.statusCode == 200) {
-        var json = jsonDecode(response.body);
+        final json = jsonDecode(response.body);
         return DateTime.tryParse(json["referenceTime"]);
       }
-    } catch (e) {
-      print(e);
-    }
   }
 
   ///The valid times for the current forecast. In the answer you get the valid time list. You can use the list to specify what valid time when getting a [MultiPointForecast] with [multiPointForecast].
   Future<List<DateTime>?> get validTime async {
-    try {
-      http.Response response =
+      final http.Response response =
           await http.get(constructSmhiUri(metfcstHost, category, version, ["validtime.json"]), headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
       if (response.statusCode == 200) {
-        var json = jsonDecode(response.body);
-        List<DateTime> validTime = List.empty(growable: true);
-        for (String time in json["validTime"]) {
-          DateTime? date = DateTime.tryParse(time);
+        final json = jsonDecode(response.body);
+        final List<DateTime> validTime = List.empty(growable: true);
+        for (final String time in json["validTime"]) {
+          final DateTime? date = DateTime.tryParse(time);
           if (date != null) validTime.add(date);
         }
         return validTime;
       }
-    } catch (e) {
-      print(e);
-    }
   }
 
   ///Returns a complete [Forecast] approximately 10 days ahead of the latest current forecast. All times in the answer given in UTC.
   Future<Forecast?> forecast(GeoPoint point) async {
-    try {
-      http.Response response = await http.get(
+      final http.Response response = await http.get(
           constructSmhiUri(metfcstHost, category, version, [
             "geotype",
             "point",
@@ -69,16 +58,12 @@ class MeteorologicalForecasts {
       if (response.statusCode == 200) {
         return Forecast.fromJson(jsonDecode(response.body));
       }
-    } catch (e) {
-      print(e);
-    }
   }
 
   ///Returns a [MultiPointForecast] which contains a forecast for all grid points with the specified `parameter`, `levelType` and `level`. The parameter `downsample` allows an integer between 0-20. A downsample value of 2 means that every other value horizontally and vertically is displayed.
   Future<MultiPointForecast?> multiPointForecast(DateTime validTime, Parameter parameter, LevelType levelType, int level, {int? downsample}) async {
-    DateFormat formatter = DateFormat("yyyyMMdd'T'HHmmss'Z'");
-    try {
-      http.Response response = await http.get(
+    final DateFormat formatter = DateFormat("yyyyMMdd'T'HHmmss'Z'");
+      final http.Response response = await http.get(
           constructSmhiUri(metfcstHost, category, version, [
             "geotype",
             "multipoint",
@@ -92,16 +77,19 @@ class MeteorologicalForecasts {
             level.toString(),
             "data.json"
           ], query: {
-            "with-geo": this._points == null,
+            "with-geo": points == null,
             "downsample": downsample != null ? downsample.toString() : "2",
           }),
           headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
       if (response.statusCode == 200) {
-        return MultiPointForecast.fromJson(jsonDecode(response.body));
+        final json = jsonDecode(response.body);
+        final MultiPointForecast multiPointForecast = MultiPointForecast.fromJson(json);
+        if (json["geometry"] != null) {
+          multiPointForecast.points = List.generate(json["geometry"]["coordinates"].length,
+              (int index) => GeoPoint(json["geometry"]["coordinates"][index][1], json["geometry"]["coordinates"][index][0]));
+        }
+        return multiPointForecast;
       }
-    } catch (e) {
-      print(e);
-    }
   }
 }
 
@@ -148,8 +136,8 @@ class ForecastMoment {
   );
 
   factory ForecastMoment.fromJson(json) {
-    Map<String, Map<String, dynamic>> params = {};
-    for (Map<String, dynamic> param in json["parameters"]) {
+    final Map<String, Map<String, dynamic>> params = {};
+    for (final Map<String, dynamic> param in json["parameters"]) {
       params[param["name"]] = param;
     }
     return ForecastMoment(
@@ -164,26 +152,32 @@ class MultiPointForecast {
   late final DateTime approvedTime;
   late final DateTime referenceTime;
   late final List values;
-  late final List<GeoPoint>? points;
+  late final List<GeoPoint> points;
 
   MultiPointForecast({
     required this.approvedTime,
     required this.referenceTime,
     required this.values,
-    this.points,
   });
 
   factory MultiPointForecast.fromJson(json) {
-    List<GeoPoint>? points;
-    if (json["geometry"] != null) {
-      points = List.generate(json["geometry"]["coordinates"].length,
-          (int index) => GeoPoint(json["geometry"]["coordinates"][index][1], json["geometry"]["coordinates"][index][0]));
-    }
     return MultiPointForecast(
       approvedTime: DateTime.parse(json["approvedTime"]),
       referenceTime: DateTime.parse(json["referenceTime"]),
       values: json["timeSeries"][0]["parameters"][0]["values"],
-      points: points,
     );
+  }
+
+  dynamic valueAt(GeoPoint at) {
+    GeoPoint? closest;
+    double? closestDistance;
+    for (final GeoPoint point in points) {
+      final double distance = calculateLatLongDistance(at.latitude, at.longitude, point.latitude, point.longitude);
+      if ((closest == null) || (closestDistance! > distance)) {
+        closest = point;
+        closestDistance = distance;
+      }
+    }
+    return closest;
   }
 }

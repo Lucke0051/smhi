@@ -1,7 +1,8 @@
-import 'dart:io';
-import 'dart:math';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
 import 'package:http/http.dart' as http;
 
 import 'metfcst.dart';
@@ -200,7 +201,7 @@ class GeoPoint {
 }
 
 Uri constructSmhiUri(String host, Category category, Version version, Iterable<String> api, {Map<String, dynamic>? query}) {
-  List<String> segments = ["api", "category", category.value, "version", version.value.toString()];
+  final List<String> segments = ["api", "category", category.value, "version", version.value.toString()];
   segments.addAll(api);
   return Uri(
     host: host,
@@ -210,15 +211,15 @@ Uri constructSmhiUri(String host, Category category, Version version, Iterable<S
   );
 }
 
-double calculateLatLongDistance(lat1, lon1, lat2, lon2) {
+double calculateLatLongDistance(double lat1, double lon1, double lat2, double lon2) {
   if (lat1 == lat2 && lon1 == lon2) return 0;
-  const p = 0.017453292519943295;
+  const double p = 0.017453292519943295;
   return 12742 * asin(sqrt(0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2));
 }
 
 List<GeoPoint>? parseGeoJson(String jsonString) {
-  List<GeoPoint> cords = List.empty(growable: true);
-  var json = jsonDecode(jsonString);
+  final List<GeoPoint> cords = List.empty(growable: true);
+  final json = jsonDecode(jsonString);
   if (json != null) {
     for (int i = 0; i < json["coordinates"][0].length; i++) {
       cords.add(GeoPoint(json["coordinates"][0][i][1], json["coordinates"][0][i][0]));
@@ -228,14 +229,10 @@ List<GeoPoint>? parseGeoJson(String jsonString) {
 }
 
 Future<List<GeoPoint>?> getSMHIBounds() async {
-  try {
-    http.Response response = await http.get(constructSmhiUri(metfcstHost, Category.pmp3g, Version.two, ["geotype", "polygon.json"]),
-        headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
-    if (response.statusCode == 200) {
-      return parseGeoJson(response.body);
-    }
-  } catch (e) {
-    print(e);
+  final http.Response response = await http.get(constructSmhiUri(metfcstHost, Category.pmp3g, Version.two, ["geotype", "polygon.json"]),
+      headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
+  if (response.statusCode == 200) {
+    return parseGeoJson(response.body);
   }
 }
 
@@ -247,24 +244,24 @@ bool isPointInPolygon(GeoPoint tap, List<GeoPoint> vertices) {
     }
   }
 
-  return ((intersectCount % 2) == 1);
+  return (intersectCount % 2) == 1;
 }
 
 bool rayCastIntersect(GeoPoint tap, GeoPoint vertA, GeoPoint vertB) {
-  double aY = vertA.latitude;
-  double bY = vertB.latitude;
-  double aX = vertA.longitude;
-  double bX = vertB.longitude;
-  double pY = tap.latitude;
-  double pX = tap.longitude;
+  final double aY = vertA.latitude;
+  final double bY = vertB.latitude;
+  final double aX = vertA.longitude;
+  final double bX = vertB.longitude;
+  final double pY = tap.latitude;
+  final double pX = tap.longitude;
 
   if ((aY > pY && bY > pY) || (aY < pY && bY < pY) || (aX < pX && bX < pX)) {
     return false;
   }
 
-  double m = (aY - bY) / (aX - bX);
-  double bee = (-aX) * m + aY;
-  double x = (pY - bee) / m;
+  final double m = (aY - bY) / (aX - bX);
+  final double bee = (-aX) * m + aY;
+  final double x = (pY - bee) / m;
 
   return x > pX;
 }
