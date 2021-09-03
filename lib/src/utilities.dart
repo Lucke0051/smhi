@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const smhiHost = "opendata-download-metfcst.smhi.se";
+import 'metfcst.dart';
 
 enum Category {
   pmp3g,
@@ -184,13 +184,14 @@ class GeoPoint {
   GeoPoint(this.latitude, this.longitude);
 }
 
-Uri constructSmhiUri(Category category, Version version, Iterable<String> api) {
+Uri constructSmhiUri(String host, Category category, Version version, Iterable<String> api, {Map<String, dynamic>? query}) {
   List<String> segments = ["api", "category", category.value, "version", version.value.toString()];
   segments.addAll(api);
   return Uri(
-    host: smhiHost,
+    host: host,
     scheme: "https",
     pathSegments: segments,
+    queryParameters: query,
   );
 }
 
@@ -213,8 +214,8 @@ List<GeoPoint>? parseGeoJson(String jsonString) {
 
 Future<List<GeoPoint>?> getSMHIBounds() async {
   try {
-    http.Response response = await http
-        .get(constructSmhiUri(Category.pmp3g, Version.two, ["geotype", "polygon.json"]), headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
+    http.Response response = await http.get(constructSmhiUri(metfcstHost, Category.pmp3g, Version.two, ["geotype", "polygon.json"]),
+        headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
     if (response.statusCode == 200) {
       return parseGeoJson(response.body);
     }
