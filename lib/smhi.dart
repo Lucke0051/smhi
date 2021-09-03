@@ -5,3 +5,4 @@ library smhi;
 
 export 'src/smhi_base.dart';
 export 'src/metfcst.dart';
+export 'src/utilities.dart';

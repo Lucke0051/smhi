@@ -160,6 +160,21 @@ extension ParameterExtension on Parameter {
   }
 }
 
+enum LevelType { hmsl, hl }
+
+extension LevelTypeExtension on LevelType {
+  String get value {
+    switch (this) {
+      case LevelType.hl:
+        return "hl";
+      case LevelType.hmsl:
+        return "hmsl";
+      default:
+        return "hl";
+    }
+  }
+}
+
 enum Unit {
   hectarePascal,
   celcius,
