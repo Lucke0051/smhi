@@ -198,6 +198,16 @@ class GeoPoint {
   double longitude;
 
   GeoPoint(this.latitude, this.longitude);
+
+  @override
+  bool operator ==(Object other) {
+    return (other is GeoPoint) && other.latitude == latitude && other.longitude == longitude;
+  }
+
+  @override
+  String toString() {
+    return "Latitude: $latitude Longitude: $longitude";
+  }
 }
 
 Uri constructSmhiUri(String host, Category category, Version version, Iterable<String> api, {Map<String, dynamic>? query}) {

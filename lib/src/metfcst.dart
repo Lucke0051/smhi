@@ -11,85 +11,87 @@ class MeteorologicalForecasts {
   late final Category category;
   late final Version version;
   List<GeoPoint>? points;
+  List? _cache;
 
   MeteorologicalForecasts({
-    required this.category,
-    required this.version,
+    this.category = Category.pmp3g,
+    this.version = Version.two,
+    this.points,
   });
 
   ///The current forecast approved time (the time the forecast latest was updated)
   Future<DateTime?> get approvedTime async {
-      final http.Response response = await http
-          .get(constructSmhiUri(metfcstHost, category, version, ["approvedtime.json"]), headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        return DateTime.tryParse(json["referenceTime"]);
-      }
+    final http.Response response =
+        await http.get(constructSmhiUri(metfcstHost, category, version, ["approvedtime.json"]), headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return DateTime.tryParse(json["referenceTime"]);
+    }
   }
 
   ///The valid times for the current forecast. In the answer you get the valid time list. You can use the list to specify what valid time when getting a [MultiPointForecast] with [multiPointForecast].
   Future<List<DateTime>?> get validTime async {
-      final http.Response response =
-          await http.get(constructSmhiUri(metfcstHost, category, version, ["validtime.json"]), headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        final List<DateTime> validTime = List.empty(growable: true);
-        for (final String time in json["validTime"]) {
-          final DateTime? date = DateTime.tryParse(time);
-          if (date != null) validTime.add(date);
-        }
-        return validTime;
+    final http.Response response =
+        await http.get(constructSmhiUri(metfcstHost, category, version, ["validtime.json"]), headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final List<DateTime> validTime = List.empty(growable: true);
+      for (final String time in json["validTime"]) {
+        final DateTime? date = DateTime.tryParse(time);
+        if (date != null) validTime.add(date);
       }
+      return validTime;
+    }
   }
 
   ///Returns a complete [Forecast] approximately 10 days ahead of the latest current forecast. All times in the answer given in UTC.
   Future<Forecast?> forecast(GeoPoint point) async {
-      final http.Response response = await http.get(
-          constructSmhiUri(metfcstHost, category, version, [
-            "geotype",
-            "point",
-            "lon",
-            point.longitude.toStringAsFixed(6),
-            "lat",
-            point.latitude.toStringAsFixed(6),
-            "data.json",
-          ]),
-          headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
-      if (response.statusCode == 200) {
-        return Forecast.fromJson(jsonDecode(response.body));
-      }
+    final http.Response response = await http.get(
+        constructSmhiUri(metfcstHost, category, version, [
+          "geotype",
+          "point",
+          "lon",
+          point.longitude.toStringAsFixed(6),
+          "lat",
+          point.latitude.toStringAsFixed(6),
+          "data.json",
+        ]),
+        headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
+    if (response.statusCode == 200) {
+      return Forecast.fromJson(jsonDecode(response.body));
+    }
   }
 
   ///Returns a [MultiPointForecast] which contains a forecast for all grid points with the specified `parameter`, `levelType` and `level`. The parameter `downsample` allows an integer between 0-20. A downsample value of 2 means that every other value horizontally and vertically is displayed.
   Future<MultiPointForecast?> multiPointForecast(DateTime validTime, Parameter parameter, LevelType levelType, int level, {int? downsample}) async {
     final DateFormat formatter = DateFormat("yyyyMMdd'T'HHmmss'Z'");
-      final http.Response response = await http.get(
-          constructSmhiUri(metfcstHost, category, version, [
-            "geotype",
-            "multipoint",
-            "validtime",
-            formatter.format(validTime),
-            "parameter",
-            parameter.value,
-            "leveltype",
-            levelType.value,
-            "level",
-            level.toString(),
-            "data.json"
-          ], query: {
-            "with-geo": points == null,
-            "downsample": downsample != null ? downsample.toString() : "2",
-          }),
-          headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        final MultiPointForecast multiPointForecast = MultiPointForecast.fromJson(json);
-        if (json["geometry"] != null) {
-          multiPointForecast.points = List.generate(json["geometry"]["coordinates"].length,
-              (int index) => GeoPoint(json["geometry"]["coordinates"][index][1], json["geometry"]["coordinates"][index][0]));
-        }
-        return multiPointForecast;
+    final http.Response response = await http.get(
+        constructSmhiUri(metfcstHost, category, version, [
+          "geotype",
+          "multipoint",
+          "validtime",
+          formatter.format(validTime),
+          "parameter",
+          parameter.value,
+          "leveltype",
+          levelType.value,
+          "level",
+          level.toString(),
+          "data.json"
+        ], query: {
+          "with-geo": (points == null).toString(),
+          "downsample": downsample != null ? downsample.toString() : "2",
+        }),
+        headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final MultiPointForecast multiPointForecast = MultiPointForecast.fromJson(json);
+      if (json["geometry"] != null) {
+        multiPointForecast.points = List.generate(json["geometry"]["coordinates"].length,
+            (int index) => GeoPoint(json["geometry"]["coordinates"][index][1], json["geometry"]["coordinates"][index][0]));
       }
+      return multiPointForecast;
+    }
   }
 }
 
