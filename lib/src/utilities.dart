@@ -6,7 +6,9 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 
 import 'metfcst.dart';
+import 'smhi_base.dart';
 
+///SMHI API category.
 enum Category {
   pmp3g,
 }
@@ -22,6 +24,7 @@ extension CategoryExtension on Category {
   }
 }
 
+///SMHI API version.
 enum Version {
   two,
 }
@@ -115,6 +118,7 @@ extension ParameterExtension on Parameter {
     }
   }
 
+  ///The [Unit] for the [Parameter]'s value.
   Unit get unit {
     switch (this) {
       case Parameter.airPressure:
@@ -161,6 +165,7 @@ extension ParameterExtension on Parameter {
   }
 }
 
+///There are two level types, `hmsl` and `hl`. `hmsl` means mean sea level and `hl` means level above ground.
 enum LevelType { hmsl, hl }
 
 extension LevelTypeExtension on LevelType {
@@ -193,6 +198,7 @@ enum Unit {
   code,
 }
 
+///A geographical point on the globe stored as a `latitude` and a `longitude`.
 class GeoPoint {
   double latitude;
   double longitude;
@@ -238,18 +244,10 @@ List<GeoPoint>? parseGeoJson(String jsonString) {
   return cords.isEmpty ? null : cords;
 }
 
-Future<List<GeoPoint>?> getSMHIBounds() async {
-  final http.Response response = await http.get(constructSmhiUri(metfcstHost, Category.pmp3g, Version.two, ["geotype", "polygon.json"]),
-      headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
-  if (response.statusCode == 200) {
-    return parseGeoJson(response.body);
-  }
-}
-
 bool isPointInPolygon(GeoPoint tap, List<GeoPoint> vertices) {
   int intersectCount = 0;
   for (int j = 0; j < vertices.length - 1; j++) {
-    if (rayCastIntersect(tap, vertices[j], vertices[j + 1])) {
+    if (_rayCastIntersect(tap, vertices[j], vertices[j + 1])) {
       intersectCount++;
     }
   }
@@ -257,7 +255,7 @@ bool isPointInPolygon(GeoPoint tap, List<GeoPoint> vertices) {
   return (intersectCount % 2) == 1;
 }
 
-bool rayCastIntersect(GeoPoint tap, GeoPoint vertA, GeoPoint vertB) {
+bool _rayCastIntersect(GeoPoint tap, GeoPoint vertA, GeoPoint vertB) {
   final double aY = vertA.latitude;
   final double bY = vertB.latitude;
   final double aX = vertA.longitude;
@@ -274,4 +272,13 @@ bool rayCastIntersect(GeoPoint tap, GeoPoint vertA, GeoPoint vertB) {
   final double x = (pY - bee) / m;
 
   return x > pX;
+}
+
+Future<http.Response> request(Uri uri) async {
+  final http.Response response = await http.get(uri, headers: {HttpHeaders.acceptEncodingHeader: "gzip"});
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    SMHICache().add(uri, json);
+  }
+  return response;
 }
