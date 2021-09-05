@@ -38,8 +38,6 @@ if (forecast != null) {
 | API                      | Supported          |
 |--------------------------|--------------------|
 | Meteorological Forecasts | ✅ (Only pmp3gv2) |
-|                          |                    |
-|                          |                    |
 
 ## Terms of use
 
