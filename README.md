@@ -3,7 +3,7 @@
 
 # SMHI Open Data for Dart
 
-A Dart package for usage of the [SMHI Open Data API][smhiDocs].
+A Dart package for usage of the [Swedish Meteorological and Hydrological Institute's Open Data API][smhiDocs].
 The API allows you to get the weather and other meterological data like air temperature & pressure.
 At the time of writing this, the Meteorological Forecasts API is available in the following countries:
 - Sweden

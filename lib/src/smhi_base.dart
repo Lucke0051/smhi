@@ -15,10 +15,13 @@ class SMHICache {
 
   ///Gets the geographical boundray from the SMHI Meteorological Forecasts API.
   Future<void> setMetFcstPoints(Category category, Version version) async {
-    final json = await request(constructSmhiUri(metfcstHost, category, version, ["geotype", "multipoint.json"]));
+    final json = await request(constructSmhiUri(
+        metfcstHost, category, version, ["geotype", "multipoint.json"]));
     if (json != null) {
-      metFcstPoints =
-          List.generate(json["coordinates"].length, (int index) => GeoPoint(json["coordinates"][index][1], json["coordinates"][index][0]));
+      metFcstPoints = List.generate(
+          json["coordinates"].length,
+          (int index) => GeoPoint(
+              json["coordinates"][index][1], json["coordinates"][index][0]));
     }
   }
 
@@ -28,7 +31,8 @@ class SMHICache {
     if (_cache!.length >= maxLength) {
       final Map<Uri, CacheBase> map = <Uri, CacheBase>{};
       final List<MapEntry<Uri, CacheBase>> entries = _cache!.entries.toList();
-      entries.sort((MapEntry<Uri, CacheBase> a, MapEntry<Uri, CacheBase> b) => a.value.compareTo(b.value));
+      entries.sort((MapEntry<Uri, CacheBase> a, MapEntry<Uri, CacheBase> b) =>
+          a.value.compareTo(b.value));
       map.addEntries(entries.getRange(0, maxLength - 2));
       _cache = map;
     }
