@@ -30,7 +30,6 @@ class SMHICache {
       final List<MapEntry<Uri, CacheBase>> entries = _cache!.entries.toList();
       entries.sort((MapEntry<Uri, CacheBase> a, MapEntry<Uri, CacheBase> b) => a.value.compareTo(b.value));
       map.addEntries(entries.getRange(0, maxLength - 2));
-      print(map);
       _cache = map;
     }
     _cache![uri] = CacheBase(value, DateTime.now());

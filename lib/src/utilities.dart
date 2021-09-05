@@ -72,7 +72,25 @@ class GeoPoint {
   String toString() {
     return "Latitude: $latitude Longitude: $longitude";
   }
+
+  @override
+  int get hashCode => hash2(latitude, longitude);
 }
+
+int hash2(dynamic a, dynamic b) => _finish(_combine(_combine(0, a.hashCode), b.hashCode));
+
+int _combine(int hash, int value) {
+  hash = 0x1fffffff & (hash + value);
+  hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+  return hash ^ (hash >> 6);
+}
+
+int _finish(int hash) {
+  hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+  hash = hash ^ (hash >> 11);
+  return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+}
+
 
 Uri constructSmhiUri(String host, Category category, Version version, Iterable<String> api, {Map<String, dynamic>? query}) {
   final List<String> segments = ["api", "category", category.value, "version", version.value.toString()];
