@@ -191,8 +191,8 @@ class ForecastMoment {
   late final DateTime validTime;
   late final Map<String, Map<String, dynamic>> _parameters;
 
-  dynamic valueOf(MetFcstParameter parameter, {int? index}) {
-    return _parameters[parameter.value]!["values"][index ?? 0];
+  double valueOf(MetFcstParameter parameter, {int? index}) {
+    return double.parse(_parameters[parameter.value]!["values"][index ?? 0].toString());
   }
 
   String levelTypeOf(MetFcstParameter parameter, {int? index}) {
