@@ -116,6 +116,49 @@ class MeteorologicalForecasts {
       return MultiPointForecast.fromJson(json);
     }
   }
+
+  MetFcstParameter? toParameter(String string) {
+    switch (string) {
+      case "msl":
+        return MetFcstParameter.airPressure;
+      case "t":
+        return MetFcstParameter.airTemperature;
+      case "vis":
+        return MetFcstParameter.horizontalVisibility;
+      case "wd":
+        return MetFcstParameter.windDirection;
+      case "ws":
+        return MetFcstParameter.windSpeed;
+      case "r":
+        return MetFcstParameter.relativeHumidity;
+      case "tstm":
+        return MetFcstParameter.thunderProbability;
+      case "tcc_mean":
+        return MetFcstParameter.meanValueOfTotalCloudCover;
+      case "lcc_mean":
+        return MetFcstParameter.meanValueOfLowLevelCloudCover;
+      case "mcc_meam":
+        return MetFcstParameter.meanValueOfMediumLevelCloudCover;
+      case "hcc_mean":
+        return MetFcstParameter.meanValueOfHighLevelCloudCover;
+      case "gust":
+        return MetFcstParameter.windGustSpeed;
+      case "pmin":
+        return MetFcstParameter.minimumPrecipitationIntensity;
+      case "pmax":
+        return MetFcstParameter.maximumPrecitipationIntensity;
+      case "spp":
+        return MetFcstParameter.percentOfPrecipitationInFrozenForm;
+      case "pcat":
+        return MetFcstParameter.precipitationCategory;
+      case "pmean":
+        return MetFcstParameter.meanPrecitipationIntensity;
+      case "pmedian":
+        return MetFcstParameter.medianPrecitipationIntensity;
+      case "Wsymb2":
+        return MetFcstParameter.weatherSymbol;
+    }
+  }
 }
 
 class Forecast {
@@ -338,51 +381,6 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return Unit.code;
       default:
         return Unit.celcius;
-    }
-  }
-}
-
-extension MetFcstExtension on String {
-  MetFcstParameter? toMetFcstParameter() {
-    switch (this) {
-      case "msl":
-        return MetFcstParameter.airPressure;
-      case "t":
-        return MetFcstParameter.airTemperature;
-      case "vis":
-        return MetFcstParameter.horizontalVisibility;
-      case "wd":
-        return MetFcstParameter.windDirection;
-      case "ws":
-        return MetFcstParameter.windSpeed;
-      case "r":
-        return MetFcstParameter.relativeHumidity;
-      case "tstm":
-        return MetFcstParameter.thunderProbability;
-      case "tcc_mean":
-        return MetFcstParameter.meanValueOfTotalCloudCover;
-      case "lcc_mean":
-        return MetFcstParameter.meanValueOfLowLevelCloudCover;
-      case "mcc_meam":
-        return MetFcstParameter.meanValueOfMediumLevelCloudCover;
-      case "hcc_mean":
-        return MetFcstParameter.meanValueOfHighLevelCloudCover;
-      case "gust":
-        return MetFcstParameter.windGustSpeed;
-      case "pmin":
-        return MetFcstParameter.minimumPrecipitationIntensity;
-      case "pmax":
-        return MetFcstParameter.maximumPrecitipationIntensity;
-      case "spp":
-        return MetFcstParameter.percentOfPrecipitationInFrozenForm;
-      case "pcat":
-        return MetFcstParameter.precipitationCategory;
-      case "pmean":
-        return MetFcstParameter.meanPrecitipationIntensity;
-      case "pmedian":
-        return MetFcstParameter.medianPrecitipationIntensity;
-      case "Wsymb2":
-        return MetFcstParameter.weatherSymbol;
     }
   }
 }
