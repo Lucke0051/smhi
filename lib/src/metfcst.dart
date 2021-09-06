@@ -343,7 +343,7 @@ extension MetFcstParameterExtension on MetFcstParameter {
 }
 
 extension MetFcstExtension on String {
-  MetFcstParameter toMetFcstParameter() {
+  MetFcstParameter? toMetFcstParameter() {
     switch (this) {
       case "msl":
         return MetFcstParameter.airPressure;
@@ -383,8 +383,6 @@ extension MetFcstExtension on String {
         return MetFcstParameter.medianPrecitipationIntensity;
       case "Wsymb2":
         return MetFcstParameter.weatherSymbol;
-      default:
-        return MetFcstParameter.airTemperature;
     }
   }
 }
