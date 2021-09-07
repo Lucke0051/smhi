@@ -381,8 +381,6 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return "pmedian";
       case MetFcstParameter.weatherSymbol:
         return "Wsymb2";
-      default:
-        return "t";
     }
   }
 
@@ -427,8 +425,34 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return Unit.millimeterPerHour;
       case MetFcstParameter.weatherSymbol:
         return Unit.code;
+    }
+  }
+
+  ///Returns if the [value] is valid for the [MetFcstParameter]. Null if no validation check is avalible for the [MetFcstParameter].
+  ///
+  ///See: https://opendata.smhi.se/apidocs/metfcst/parameters.html
+  bool? validate(double value) {
+    switch (this) {
+      case MetFcstParameter.relativeHumidity:
+        return value >= 0 && value <= 100;
+      case MetFcstParameter.thunderProbability:
+        return value >= 0 && value <= 100;
+      case MetFcstParameter.meanValueOfTotalCloudCover:
+        return value >= 0 && value <= 8 && value.roundToDouble() == value;
+      case MetFcstParameter.meanValueOfLowLevelCloudCover:
+        return value >= 0 && value <= 8 && value.roundToDouble() == value;
+      case MetFcstParameter.meanValueOfMediumLevelCloudCover:
+        return value >= 0 && value <= 8 && value.roundToDouble() == value;
+      case MetFcstParameter.meanValueOfHighLevelCloudCover:
+        return value >= 0 && value <= 8 && value.roundToDouble() == value;
+      case MetFcstParameter.percentOfPrecipitationInFrozenForm:
+        return value == -9 || (value >= 0 && value <= 100);
+      case MetFcstParameter.precipitationCategory:
+        return value >= 0 && value <= 6 && value.roundToDouble() == value;
+      case MetFcstParameter.weatherSymbol:
+        return value >= 1 && value <= 27 && value.roundToDouble() == value;
       default:
-        return Unit.celcius;
+        return null;
     }
   }
 }
