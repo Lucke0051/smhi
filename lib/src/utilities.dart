@@ -55,7 +55,9 @@ enum Unit {
   code,
 }
 
+
 extension UnitExtension on Unit {
+  ///Returns a readable version of the [Unit]. This is likley what you would show to the user.
   String get value {
     switch (this) {
       case Unit.category:
