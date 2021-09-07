@@ -186,10 +186,10 @@ class Forecast {
       (ForecastMoment value, ForecastMoment element) => value.validTime.difference(date) < element.validTime.difference(date) ? value : element);
 
   ///Returns [ForecastMoment]s after `after` and before `before`.
-  List<ForecastMoment> momentsBetween(DateTime after, DateTime before) {
+  List<ForecastMoment> momentsBetween(DateTime after, {DateTime? before}) {
     final List<ForecastMoment> moments = List.empty(growable: true);
     timeSeries.forEach((ForecastMoment moment) {
-      if (moment.validTime.isAfter(after) && moment.validTime.isBefore(before)) moments.add(moment);
+      if (moment.validTime.isAfter(after) && (before == null || moment.validTime.isBefore(before))) moments.add(moment);
     });
     return moments;
   }
