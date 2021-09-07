@@ -356,13 +356,13 @@ extension MetFcstParameterExtension on MetFcstParameter {
       case MetFcstParameter.thunderProbability:
         return Unit.percent;
       case MetFcstParameter.meanValueOfTotalCloudCover:
-        return Unit.octas;
+        return Unit.okta;
       case MetFcstParameter.meanValueOfLowLevelCloudCover:
-        return Unit.octas;
+        return Unit.okta;
       case MetFcstParameter.meanValueOfMediumLevelCloudCover:
-        return Unit.octas;
+        return Unit.okta;
       case MetFcstParameter.meanValueOfHighLevelCloudCover:
-        return Unit.octas;
+        return Unit.okta;
       case MetFcstParameter.windGustSpeed:
         return Unit.meterPerSecond;
       case MetFcstParameter.minimumPrecipitationIntensity:
