@@ -194,12 +194,37 @@ class Forecast {
     return moments;
   }
 
+  ///Returns the average value of the specified [parameter] in [moments];
   static double averageOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
     double value = 0;
     moments.forEach((ForecastMoment element) {
       value += element.valueOf(parameter);
     });
     return value / moments.length;
+  }
+
+  ///Returns the lowest value of the specified [parameter] in [moments];
+  static double lowestOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+    double? value;
+    moments.forEach((ForecastMoment element) {
+      final double elementValue = element.valueOf(parameter);
+      if (value == null || value! > elementValue) {
+        value = elementValue;
+      }
+    });
+    return value!;
+  }
+
+  ///Returns the highest value of the specified [parameter] in [moments];
+  static double highestOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+    double? value;
+    moments.forEach((ForecastMoment element) {
+      final double elementValue = element.valueOf(parameter);
+      if (value == null || value! < elementValue) {
+        value = elementValue;
+      }
+    });
+    return value!;
   }
 }
 
