@@ -184,6 +184,23 @@ class Forecast {
   ///Returns the [ForecastMoment] closest to the specified [date].
   ForecastMoment momentWhen(DateTime date) => timeSeries.reduce(
       (ForecastMoment value, ForecastMoment element) => value.validTime.difference(date) < element.validTime.difference(date) ? value : element);
+
+  ///Returns [ForecastMoment]s after `after` and before `before`.
+  List<ForecastMoment> momentsBetween(DateTime after, DateTime before) {
+    final List<ForecastMoment> moments = List.empty(growable: true);
+    timeSeries.forEach((ForecastMoment moment) {
+      if (moment.validTime.isAfter(after) && moment.validTime.isBefore(before)) moments.add(moment);
+    });
+    return moments;
+  }
+
+  static double averageOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+    double value = 0;
+    moments.forEach((ForecastMoment element) {
+      value += element.valueOf(parameter);
+    });
+    return value / moments.length;
+  }
 }
 
 //Forecasts are divided into moments where each [ForecastMoment] represents a timestamp.
