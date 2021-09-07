@@ -184,15 +184,63 @@ class Forecast {
   ///Returns the [ForecastMoment] closest to the specified [date].
   ForecastMoment momentWhen(DateTime date) => timeSeries.reduce(
       (ForecastMoment value, ForecastMoment element) => value.validTime.difference(date) < element.validTime.difference(date) ? value : element);
+
+  ///Returns [ForecastMoment]s after `after` and before `before`.
+  List<ForecastMoment> momentsBetween(DateTime after, {DateTime? before}) {
+    final List<ForecastMoment> moments = List.empty(growable: true);
+    timeSeries.forEach((ForecastMoment moment) {
+      if (moment.validTime.isAfter(after) && (before == null || moment.validTime.isBefore(before))) moments.add(moment);
+    });
+    return moments;
+  }
+
+  ///Returns the average value of the specified [parameter] in [moments];
+  static double averageOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+    double value = 0;
+    moments.forEach((ForecastMoment element) {
+      value += element.valueOf(parameter);
+    });
+    return value / moments.length;
+  }
+
+  ///Returns the lowest value of the specified [parameter] in [moments];
+  static double lowestOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+    double? value;
+    moments.forEach((ForecastMoment element) {
+      final double elementValue = element.valueOf(parameter);
+      if (value == null || value! > elementValue) {
+        value = elementValue;
+      }
+    });
+    return value!;
+  }
+
+  ///Returns the highest value of the specified [parameter] in [moments];
+  static double highestOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+    double? value;
+    moments.forEach((ForecastMoment element) {
+      final double elementValue = element.valueOf(parameter);
+      if (value == null || value! < elementValue) {
+        value = elementValue;
+      }
+    });
+    return value!;
+  }
 }
 
 //Forecasts are divided into moments where each [ForecastMoment] represents a timestamp.
 class ForecastMoment {
   late final DateTime validTime;
   late final Map<String, Map<String, dynamic>> _parameters;
+  final Map<MetFcstParameter, double> _values = <MetFcstParameter, double>{};
 
   double valueOf(MetFcstParameter parameter, {int? index}) {
-    return double.parse(_parameters[parameter.value]!["values"][index ?? 0].toString());
+    if (_values[parameter] != null) {
+      return _values[parameter]!;
+    }
+    final double value = double.parse(_parameters[parameter.value]!["values"][index ?? 0].toString());
+    _values[parameter] = value;
+    return value;
   }
 
   String levelTypeOf(MetFcstParameter parameter, {int? index}) {
