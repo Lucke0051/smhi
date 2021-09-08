@@ -322,7 +322,7 @@ enum MetFcstParameter {
   meanValueOfHighLevelCloudCover,
   windGustSpeed,
   minimumPrecipitationIntensity,
-  maximumPrecitipationIntensity,
+  maximumPrecipitationIntensity,
 
   /// Int, -9 or 0-100, if there is no precipitation, the value of the spp parameter will be -9.
   percentOfPrecipitationInFrozenForm,
@@ -369,7 +369,7 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return "gust";
       case MetFcstParameter.minimumPrecipitationIntensity:
         return "pmin";
-      case MetFcstParameter.maximumPrecitipationIntensity:
+      case MetFcstParameter.maximumPrecipitationIntensity:
         return "pmax";
       case MetFcstParameter.percentOfPrecipitationInFrozenForm:
         return "spp";
@@ -413,7 +413,7 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return Unit.meterPerSecond;
       case MetFcstParameter.minimumPrecipitationIntensity:
         return Unit.millimeterPerHour;
-      case MetFcstParameter.maximumPrecitipationIntensity:
+      case MetFcstParameter.maximumPrecipitationIntensity:
         return Unit.millimeterPerHour;
       case MetFcstParameter.percentOfPrecipitationInFrozenForm:
         return Unit.percent;
