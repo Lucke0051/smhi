@@ -146,7 +146,7 @@ class MeteorologicalForecasts {
       case "pmin":
         return MetFcstParameter.minimumPrecipitationIntensity;
       case "pmax":
-        return MetFcstParameter.maximumPrecitipationIntensity;
+        return MetFcstParameter.maximumPrecipitationIntensity;
       case "spp":
         return MetFcstParameter.percentOfPrecipitationInFrozenForm;
       case "pcat":
