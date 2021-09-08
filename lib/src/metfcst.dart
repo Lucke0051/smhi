@@ -146,15 +146,15 @@ class MeteorologicalForecasts {
       case "pmin":
         return MetFcstParameter.minimumPrecipitationIntensity;
       case "pmax":
-        return MetFcstParameter.maximumPrecitipationIntensity;
+        return MetFcstParameter.maximumPrecipitationIntensity;
       case "spp":
         return MetFcstParameter.percentOfPrecipitationInFrozenForm;
       case "pcat":
         return MetFcstParameter.precipitationCategory;
       case "pmean":
-        return MetFcstParameter.meanPrecitipationIntensity;
+        return MetFcstParameter.meanPrecipitationIntensity;
       case "pmedian":
-        return MetFcstParameter.medianPrecitipationIntensity;
+        return MetFcstParameter.medianPrecipitationIntensity;
       case "Wsymb2":
         return MetFcstParameter.weatherSymbol;
     }
@@ -322,7 +322,7 @@ enum MetFcstParameter {
   meanValueOfHighLevelCloudCover,
   windGustSpeed,
   minimumPrecipitationIntensity,
-  maximumPrecitipationIntensity,
+  maximumPrecipitationIntensity,
 
   /// Int, -9 or 0-100, if there is no precipitation, the value of the spp parameter will be -9.
   percentOfPrecipitationInFrozenForm,
@@ -335,8 +335,8 @@ enum MetFcstParameter {
   ///5:	Freezing rain
   ///6:	Freezing drizzle
   precipitationCategory,
-  meanPrecitipationIntensity,
-  medianPrecitipationIntensity,
+  meanPrecipitationIntensity,
+  medianPrecipitationIntensity,
   weatherSymbol,
 }
 
@@ -369,15 +369,15 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return "gust";
       case MetFcstParameter.minimumPrecipitationIntensity:
         return "pmin";
-      case MetFcstParameter.maximumPrecitipationIntensity:
+      case MetFcstParameter.maximumPrecipitationIntensity:
         return "pmax";
       case MetFcstParameter.percentOfPrecipitationInFrozenForm:
         return "spp";
       case MetFcstParameter.precipitationCategory:
         return "pcat";
-      case MetFcstParameter.meanPrecitipationIntensity:
+      case MetFcstParameter.meanPrecipitationIntensity:
         return "pmean";
-      case MetFcstParameter.medianPrecitipationIntensity:
+      case MetFcstParameter.medianPrecipitationIntensity:
         return "pmedian";
       case MetFcstParameter.weatherSymbol:
         return "Wsymb2";
@@ -413,15 +413,15 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return Unit.meterPerSecond;
       case MetFcstParameter.minimumPrecipitationIntensity:
         return Unit.millimeterPerHour;
-      case MetFcstParameter.maximumPrecitipationIntensity:
+      case MetFcstParameter.maximumPrecipitationIntensity:
         return Unit.millimeterPerHour;
       case MetFcstParameter.percentOfPrecipitationInFrozenForm:
         return Unit.percent;
       case MetFcstParameter.precipitationCategory:
         return Unit.category;
-      case MetFcstParameter.meanPrecitipationIntensity:
+      case MetFcstParameter.meanPrecipitationIntensity:
         return Unit.millimeterPerHour;
-      case MetFcstParameter.medianPrecitipationIntensity:
+      case MetFcstParameter.medianPrecipitationIntensity:
         return Unit.millimeterPerHour;
       case MetFcstParameter.weatherSymbol:
         return Unit.code;
