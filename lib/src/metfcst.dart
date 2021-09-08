@@ -117,7 +117,7 @@ class MeteorologicalForecasts {
     }
   }
 
-  MetFcstParameter? toParameter(String string) {
+  static MetFcstParameter? toParameter(String string) {
     switch (string) {
       case "msl":
         return MetFcstParameter.airPressure;
