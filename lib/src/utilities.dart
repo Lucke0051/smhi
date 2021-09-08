@@ -86,10 +86,10 @@ extension UnitExtension on Unit {
 
 ///A geographical point on the globe stored as a `latitude` and a `longitude`.
 class GeoPoint {
-  double latitude;
-  double longitude;
+  final double latitude;
+  final double longitude;
 
-  GeoPoint(this.latitude, this.longitude);
+  const GeoPoint(this.latitude, this.longitude);
 
   @override
   bool operator ==(Object other) {
