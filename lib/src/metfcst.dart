@@ -152,9 +152,9 @@ class MeteorologicalForecasts {
       case "pcat":
         return MetFcstParameter.precipitationCategory;
       case "pmean":
-        return MetFcstParameter.meanPrecitipationIntensity;
+        return MetFcstParameter.meanPrecipitationIntensity;
       case "pmedian":
-        return MetFcstParameter.medianPrecitipationIntensity;
+        return MetFcstParameter.medianPrecipitationIntensity;
       case "Wsymb2":
         return MetFcstParameter.weatherSymbol;
     }
@@ -335,8 +335,8 @@ enum MetFcstParameter {
   ///5:	Freezing rain
   ///6:	Freezing drizzle
   precipitationCategory,
-  meanPrecitipationIntensity,
-  medianPrecitipationIntensity,
+  meanPrecipitationIntensity,
+  medianPrecipitationIntensity,
   weatherSymbol,
 }
 
@@ -375,9 +375,9 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return "spp";
       case MetFcstParameter.precipitationCategory:
         return "pcat";
-      case MetFcstParameter.meanPrecitipationIntensity:
+      case MetFcstParameter.meanPrecipitationIntensity:
         return "pmean";
-      case MetFcstParameter.medianPrecitipationIntensity:
+      case MetFcstParameter.medianPrecipitationIntensity:
         return "pmedian";
       case MetFcstParameter.weatherSymbol:
         return "Wsymb2";
@@ -419,9 +419,9 @@ extension MetFcstParameterExtension on MetFcstParameter {
         return Unit.percent;
       case MetFcstParameter.precipitationCategory:
         return Unit.category;
-      case MetFcstParameter.meanPrecitipationIntensity:
+      case MetFcstParameter.meanPrecipitationIntensity:
         return Unit.millimeterPerHour;
-      case MetFcstParameter.medianPrecitipationIntensity:
+      case MetFcstParameter.medianPrecipitationIntensity:
         return Unit.millimeterPerHour;
       case MetFcstParameter.weatherSymbol:
         return Unit.code;
