@@ -206,7 +206,16 @@ class Forecast {
     return moments;
   }
 
-  ///Returns the average value of the specified [parameter] in [moments];
+  ///Returns the mode value of the specified [parameter] in [moments];
+  static double modeOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+    final List<double> values = List.empty(growable: false);
+    moments.forEach((ForecastMoment element) {
+      values.add(element.valueOf(parameter));
+    });
+    return _mode(values);
+  }
+
+  ///Returns the type value value of the specified [parameter] in [moments];
   static double averageOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
     double value = 0;
     moments.forEach((ForecastMoment element) {
@@ -483,4 +492,21 @@ extension MetFcstLevelTypeExtension on MetFcstLevelType {
         return "hl";
     }
   }
+}
+
+double _mode(List<double> a) {
+  double maxValue = 0.0;
+  int maxCount = 0;
+
+  for (int i = 0; i < a.length; ++i) {
+    int count = 0;
+    for (int j = 0; j < a.length; ++j) {
+      if (a[j] == a[i]) ++count;
+    }
+    if (count > maxCount) {
+      maxCount = count;
+      maxValue = a[i];
+    }
+  }
+  return maxValue;
 }
