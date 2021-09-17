@@ -200,51 +200,51 @@ class Forecast {
   ///Returns [ForecastMoment]s after `after` and before `before`.
   List<ForecastMoment> momentsBetween(DateTime after, {DateTime? before}) {
     final List<ForecastMoment> moments = List.empty(growable: true);
-    timeSeries.forEach((ForecastMoment moment) {
+    for (final ForecastMoment moment in timeSeries) {
       if (moment.validTime.isAfter(after) && (before == null || moment.validTime.isBefore(before))) moments.add(moment);
-    });
+    }
     return moments;
   }
 
   ///Returns the mode value of the specified [parameter] in [moments];
   static double modeOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
     final List<double> values = List.empty(growable: true);
-    moments.forEach((ForecastMoment element) {
+    for (final ForecastMoment element in moments) {
       values.add(element.valueOf(parameter));
-    });
+    }
     return _mode(values);
   }
 
   ///Returns the type value value of the specified [parameter] in [moments];
   static double averageOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
     double value = 0;
-    moments.forEach((ForecastMoment element) {
+    for (final ForecastMoment element in moments) {
       value += element.valueOf(parameter);
-    });
+    }
     return value / moments.length;
   }
 
   ///Returns the lowest value of the specified [parameter] in [moments];
   static double lowestOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
     double? value;
-    moments.forEach((ForecastMoment element) {
+    for (final ForecastMoment element in moments) {
       final double elementValue = element.valueOf(parameter);
-      if (value == null || value! > elementValue) {
+      if (value == null || value > elementValue) {
         value = elementValue;
       }
-    });
+    }
     return value!;
   }
 
   ///Returns the highest value of the specified [parameter] in [moments];
   static double highestOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
     double? value;
-    moments.forEach((ForecastMoment element) {
+    for (final ForecastMoment element in moments) {
       final double elementValue = element.valueOf(parameter);
-      if (value == null || value! < elementValue) {
+      if (value == null || value < elementValue) {
         value = elementValue;
       }
-    });
+    }
     return value!;
   }
 }
