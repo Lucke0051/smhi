@@ -208,7 +208,7 @@ class Forecast {
 
   ///Returns the mode value of the specified [parameter] in [moments];
   static double modeOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
-    final List<double> values = List.empty(growable: false);
+    final List<double> values = List.empty(growable: true);
     moments.forEach((ForecastMoment element) {
       values.add(element.valueOf(parameter));
     });
