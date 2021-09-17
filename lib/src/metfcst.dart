@@ -183,7 +183,19 @@ class Forecast {
 
   ///Returns the [ForecastMoment] closest to the specified [date].
   ForecastMoment momentWhen(DateTime date) => timeSeries.reduce(
-      (ForecastMoment value, ForecastMoment element) => value.validTime.difference(date) < element.validTime.difference(date) ? value : element);
+        (ForecastMoment value, ForecastMoment element) => value.validTime.difference(date) < element.validTime.difference(date) ? value : element,
+      );
+
+  ///Returns the [ForecastMoment] closest to the specified [date] after [after].
+  ForecastMoment momentWhenAfter(DateTime date, DateTime after) {
+    final List<ForecastMoment> afterTimeSeries = List.empty(growable: true);
+    for (final ForecastMoment moment in timeSeries) {
+      if (moment.validTime.isAfter(after)) afterTimeSeries.add(moment);
+    }
+    return afterTimeSeries.reduce(
+      (ForecastMoment value, ForecastMoment element) => value.validTime.difference(date) < element.validTime.difference(date) ? value : element,
+    );
+  }
 
   ///Returns [ForecastMoment]s after `after` and before `before`.
   List<ForecastMoment> momentsBetween(DateTime after, {DateTime? before}) {
