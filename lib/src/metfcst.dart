@@ -16,7 +16,8 @@ class MeteorologicalForecasts {
 
   ///The current forecast approved time (the time the forecast latest was updated).
   Future<DateTime?> get approvedTime async {
-    final json = await request(constructSmhiUri(metfcstHost, category, version, ["approvedtime.json"]));
+    final json = await request(constructSmhiUri(
+        metfcstHost, category, version, ["approvedtime.json"]));
     if (json != null) {
       return DateTime.tryParse(json["referenceTime"]);
     }
@@ -24,7 +25,8 @@ class MeteorologicalForecasts {
 
   ///The valid times for the current forecast. In the answer you get the valid time list.
   Future<List<DateTime>?> get validTime async {
-    final json = await request(constructSmhiUri(metfcstHost, category, version, ["validtime.json"]));
+    final json = await request(
+        constructSmhiUri(metfcstHost, category, version, ["validtime.json"]));
     if (json != null) {
       final List<DateTime> validTime = List.empty(growable: true);
       for (final String time in json["validTime"]) {
@@ -37,7 +39,8 @@ class MeteorologicalForecasts {
 
   ///The valid times for the current multipoint forecast. In the answer you get the valid time list. You can use the list to specify what valid time when getting a [MultiPointForecast] with [multiPointForecast].
   Future<List<DateTime>?> get multiPointValidTime async {
-    final json = await request(constructSmhiUri(metfcstHost, category, version, ["geotype", "multipoint", "validtime.json"]));
+    final json = await request(constructSmhiUri(metfcstHost, category, version,
+        ["geotype", "multipoint", "validtime.json"]));
     if (json != null) {
       final List<DateTime> validTime = List.empty(growable: true);
       for (final String time in json["validTime"]) {
@@ -50,7 +53,10 @@ class MeteorologicalForecasts {
 
   ///The bounding box polygon for the [Forecast] and [MultiPointForecast] area.
   Future<List<GeoPoint>?> getSMHIBounds() async {
-    final String? data = await request(constructSmhiUri(metfcstHost, Category.pmp3g, Version.two, ["geotype", "polygon.json"]), decode: false);
+    final String? data = await request(
+        constructSmhiUri(metfcstHost, Category.pmp3g, Version.two,
+            ["geotype", "polygon.json"]),
+        decode: false);
     if (data != null) {
       return parseGeoJson(data);
     }
@@ -69,15 +75,17 @@ class MeteorologicalForecasts {
   ///}
   ///```
   Future<Forecast?> forecast(GeoPoint point) async {
-    final json = await request(constructSmhiUri(metfcstHost, category, version, [
-      "geotype",
-      "point",
-      "lon",
-      point.longitude.toStringAsFixed(6),
-      "lat",
-      point.latitude.toStringAsFixed(6),
-      "data.json",
-    ]));
+    final json = await request(
+      constructSmhiUri(metfcstHost, category, version, [
+        "geotype",
+        "point",
+        "lon",
+        point.longitude.toStringAsFixed(6),
+        "lat",
+        point.latitude.toStringAsFixed(6),
+        "data.json",
+      ]),
+    );
     if (json != null) {
       return Forecast.fromJson(json);
     }
@@ -88,30 +96,42 @@ class MeteorologicalForecasts {
   ///The parameter [downsample] allows an integer between 0-20. A downsample value of 2 means that every other value horizontally and vertically is displayed.
   ///
   ///`points` are automatically stored in the [SMHICache] if there is no `points` there already.
-  Future<MultiPointForecast?> multiPointForecast(DateTime validTime, MetFcstParameter parameter, MetFcstLevelType levelType, int level,
+  Future<MultiPointForecast?> multiPointForecast(DateTime validTime,
+      MetFcstParameter parameter, MetFcstLevelType levelType, int level,
       {int? downsample}) async {
     final SMHICache cache = SMHICache();
     final DateFormat formatter = DateFormat("yyyyMMdd'T'HHmmss'Z'");
-    final json = await request(constructSmhiUri(metfcstHost, category, version, [
-      "geotype",
-      "multipoint",
-      "validtime",
-      formatter.format(validTime),
-      "parameter",
-      parameter.value,
-      "leveltype",
-      levelType.value,
-      "level",
-      level.toString(),
-      "data.json"
-    ], query: {
-      "with-geo": (cache.metFcstPoints == null).toString(),
-      "downsample": downsample != null ? downsample.toString() : "2",
-    }));
+    final json = await request(
+      constructSmhiUri(
+        metfcstHost,
+        category,
+        version,
+        [
+          "geotype",
+          "multipoint",
+          "validtime",
+          formatter.format(validTime),
+          "parameter",
+          parameter.value,
+          "leveltype",
+          levelType.value,
+          "level",
+          level.toString(),
+          "data.json"
+        ],
+        query: {
+          "with-geo": (cache.metFcstPoints == null).toString(),
+          "downsample": downsample != null ? downsample.toString() : "2",
+        },
+      ),
+    );
     if (json != null) {
       if (json["geometry"] != null) {
-        cache.metFcstPoints = List.generate(json["geometry"]["coordinates"].length,
-            (int index) => GeoPoint(json["geometry"]["coordinates"][index][1], json["geometry"]["coordinates"][index][0]));
+        cache.metFcstPoints = List.generate(
+          json["geometry"]["coordinates"].length,
+          (int index) => GeoPoint(json["geometry"]["coordinates"][index][1],
+              json["geometry"]["coordinates"][index][0]),
+        );
       }
       return MultiPointForecast.fromJson(json);
     }
@@ -177,13 +197,19 @@ class Forecast {
   factory Forecast.fromJson(json) => Forecast(
         approvedTime: DateTime.parse(json["approvedTime"]),
         referenceTime: DateTime.parse(json["referenceTime"]),
-        point: GeoPoint(json["geometry"]["coordinates"][0][1], json["geometry"]["coordinates"][0][0]),
-        timeSeries: List.generate(json["timeSeries"].length, (int index) => ForecastMoment.fromJson(json["timeSeries"][index])),
+        point: GeoPoint(json["geometry"]["coordinates"][0][1],
+            json["geometry"]["coordinates"][0][0]),
+        timeSeries: List.generate(json["timeSeries"].length,
+            (int index) => ForecastMoment.fromJson(json["timeSeries"][index])),
       );
 
   ///Returns the [ForecastMoment] closest to the specified [date].
   ForecastMoment momentWhen(DateTime date) => timeSeries.reduce(
-        (ForecastMoment value, ForecastMoment element) => value.validTime.difference(date) < element.validTime.difference(date) ? value : element,
+        (ForecastMoment value, ForecastMoment element) =>
+            value.validTime.difference(date) <
+                    element.validTime.difference(date)
+                ? value
+                : element,
       );
 
   ///Returns the [ForecastMoment] closest to the specified [date] after [after].
@@ -193,7 +219,10 @@ class Forecast {
       if (moment.validTime.isAfter(after)) afterTimeSeries.add(moment);
     }
     return afterTimeSeries.reduce(
-      (ForecastMoment value, ForecastMoment element) => value.validTime.difference(date) < element.validTime.difference(date) ? value : element,
+      (ForecastMoment value, ForecastMoment element) =>
+          value.validTime.difference(date) < element.validTime.difference(date)
+              ? value
+              : element,
     );
   }
 
@@ -201,13 +230,16 @@ class Forecast {
   List<ForecastMoment> momentsBetween(DateTime after, {DateTime? before}) {
     final List<ForecastMoment> moments = List.empty(growable: true);
     for (final ForecastMoment moment in timeSeries) {
-      if (moment.validTime.isAfter(after) && (before == null || moment.validTime.isBefore(before))) moments.add(moment);
+      if (moment.validTime.isAfter(after) &&
+          (before == null || moment.validTime.isBefore(before)))
+        moments.add(moment);
     }
     return moments;
   }
 
   ///Returns the mode value of the specified [parameter] in [moments];
-  static double modeOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+  static double modeOf(
+      MetFcstParameter parameter, List<ForecastMoment> moments) {
     final List<double> values = List.empty(growable: true);
     for (final ForecastMoment element in moments) {
       values.add(element.valueOf(parameter));
@@ -216,7 +248,8 @@ class Forecast {
   }
 
   ///Returns the type value value of the specified [parameter] in [moments];
-  static double averageOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+  static double averageOf(
+      MetFcstParameter parameter, List<ForecastMoment> moments) {
     double value = 0;
     for (final ForecastMoment element in moments) {
       value += element.valueOf(parameter);
@@ -225,7 +258,8 @@ class Forecast {
   }
 
   ///Returns the lowest value of the specified [parameter] in [moments];
-  static double lowestOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+  static double lowestOf(
+      MetFcstParameter parameter, List<ForecastMoment> moments) {
     double? value;
     for (final ForecastMoment element in moments) {
       final double elementValue = element.valueOf(parameter);
@@ -237,7 +271,8 @@ class Forecast {
   }
 
   ///Returns the highest value of the specified [parameter] in [moments];
-  static double highestOf(MetFcstParameter parameter, List<ForecastMoment> moments) {
+  static double highestOf(
+      MetFcstParameter parameter, List<ForecastMoment> moments) {
     double? value;
     for (final ForecastMoment element in moments) {
       final double elementValue = element.valueOf(parameter);
@@ -259,7 +294,8 @@ class ForecastMoment {
     if (_values[parameter] != null) {
       return _values[parameter]!;
     }
-    final double value = double.parse(_parameters[parameter.value]!["values"][index ?? 0].toString());
+    final double value = double.parse(
+        _parameters[parameter.value]!["values"][index ?? 0].toString());
     _values[parameter] = value;
     return value;
   }
@@ -305,7 +341,9 @@ class MultiPointForecast {
     return MultiPointForecast(
       approvedTime: DateTime.parse(json["approvedTime"]),
       referenceTime: DateTime.parse(json["referenceTime"]),
-      values: json["timeSeries"] != null && json["timeSeries"].isNotEmpty ? json["timeSeries"][0]["parameters"][0]["values"] : [],
+      values: json["timeSeries"] != null && json["timeSeries"].isNotEmpty
+          ? json["timeSeries"][0]["parameters"][0]["values"]
+          : [],
     );
   }
 
@@ -316,7 +354,8 @@ class MultiPointForecast {
     double? closestDistance;
     for (int i = 0; i < points.length; i++) {
       final GeoPoint point = points[i];
-      final double distance = calculateLatLongDistance(at.latitude, at.longitude, point.latitude, point.longitude);
+      final double distance = calculateLatLongDistance(
+          at.latitude, at.longitude, point.latitude, point.longitude);
       if ((closestIndex == null) || (closestDistance! > distance)) {
         closestIndex = i;
         closestDistance = distance;

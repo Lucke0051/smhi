@@ -15,13 +15,22 @@ class SMHICache {
 
   ///Gets the geographical boundray from the SMHI Meteorological Forecasts API.
   Future<void> setMetFcstPoints(Category category, Version version) async {
-    final json = await request(constructSmhiUri(
-        metfcstHost, category, version, ["geotype", "multipoint.json"]));
+    final json = await request(
+      constructSmhiUri(
+        metfcstHost,
+        category,
+        version,
+        ["geotype", "multipoint.json"],
+      ),
+    );
     if (json != null) {
       metFcstPoints = List.generate(
-          json["coordinates"].length,
-          (int index) => GeoPoint(
-              json["coordinates"][index][1], json["coordinates"][index][0]));
+        json["coordinates"].length,
+        (int index) => GeoPoint(
+          json["coordinates"][index][1],
+          json["coordinates"][index][0],
+        ),
+      );
     }
   }
 

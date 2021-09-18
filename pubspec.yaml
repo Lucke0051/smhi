@@ -1,6 +1,6 @@
 name: smhi
 description: A Dart package for usage of the Swedish Meteorological and Hydrological Institute's Open Data API
-version: 0.0.1-dev.2
+version: 0.0.1-dev.3
 homepage: https://github.com/Lucke0051/smhi
 
 environment:
