@@ -9,6 +9,7 @@ class Warnings {
     this.version = Version.two,
   });
 
+  ///Returns the [District] closest to [at]. Causes an exception if [districts.isEmpty].
   static District districtAt(GeoPoint at, List<District> districts) {
     District? closest;
     double? currentClosestDist;
@@ -28,12 +29,13 @@ class Warnings {
           districts[i].point.latitude,
           districts[i].point.longitude,
         );
-        if (dist < 100 && dist < currentClosestDist) {
+        if (dist < 100 && dist < currentClosestDist!) {
           closest = districts[i];
+          currentClosestDist = dist;
         }
       }
     }
-    return closest;
+    return closest!;
   }
 
   ///Returns the [Alert] with the highest [AlertSeverity]. Causes an exception if [alerts.isEmpty].
