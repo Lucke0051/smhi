@@ -12,4 +12,5 @@
 
 ## 0.0.2-dev.1
 
+- Added support for the SMHI Warnings API
 - Fixed bugs

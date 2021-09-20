@@ -16,8 +16,6 @@ extension CategoryExtension on Category {
     switch (this) {
       case Category.pmp3g:
         return "pmp3g";
-      default:
-        return "pmp3g";
     }
   }
 }
@@ -90,11 +88,16 @@ class GeoPoint {
 
   const GeoPoint(this.latitude, this.longitude);
 
+  ///Creates a [GeoPoint] from a string in the following format: POINT(60.45 17.78).
+  factory GeoPoint.fromStringPoint(String string) {
+    final String sep = string.substring(6, string.length - 1);
+    final List<String> split = sep.split(" ");
+    return GeoPoint(double.parse(split[0]), double.parse(split[1]));
+  }
+
   @override
   bool operator ==(Object other) {
-    return (other is GeoPoint) &&
-        other.latitude == latitude &&
-        other.longitude == longitude;
+    return (other is GeoPoint) && other.latitude == latitude && other.longitude == longitude;
   }
 
   @override
@@ -106,8 +109,7 @@ class GeoPoint {
   int get hashCode => hash2(latitude, longitude);
 }
 
-int hash2(dynamic a, dynamic b) =>
-    _finish(_combine(_combine(0, a.hashCode), b.hashCode));
+int hash2(dynamic a, dynamic b) => _finish(_combine(_combine(0, a.hashCode), b.hashCode));
 
 int _combine(int hash, int value) {
   hash = 0x1fffffff & (hash + value);
@@ -121,33 +123,10 @@ int _finish(int hash) {
   return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
 }
 
-Uri constructSmhiUri(
-    String host, Category category, Version version, Iterable<String> api,
-    {Map<String, dynamic>? query}) {
-  final List<String> segments = [
-    "api",
-    "category",
-    category.value,
-    "version",
-    version.value.toString()
-  ];
-  segments.addAll(api);
-  return Uri(
-    host: host,
-    scheme: "https",
-    pathSegments: segments,
-    queryParameters: query,
-  );
-}
-
-double calculateLatLongDistance(
-    double lat1, double lon1, double lat2, double lon2) {
+double calculateLatLongDistance(double lat1, double lon1, double lat2, double lon2) {
   if (lat1 == lat2 && lon1 == lon2) return 0;
   const double p = 0.017453292519943295;
-  return 12742 *
-      asin(sqrt(0.5 -
-          cos((lat2 - lat1) * p) / 2 +
-          cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2));
+  return 12742 * asin(sqrt(0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2));
 }
 
 List<GeoPoint>? parseGeoJson(String jsonString) {
@@ -155,8 +134,7 @@ List<GeoPoint>? parseGeoJson(String jsonString) {
   final json = jsonDecode(jsonString);
   if (json != null) {
     for (int i = 0; i < json["coordinates"][0].length; i++) {
-      cords.add(
-          GeoPoint(json["coordinates"][0][i][1], json["coordinates"][0][i][0]));
+      cords.add(GeoPoint(json["coordinates"][0][i][1], json["coordinates"][0][i][0]));
     }
   }
   return cords.isEmpty ? null : cords;
@@ -192,7 +170,7 @@ bool _rayCastIntersect(GeoPoint tap, GeoPoint vertA, GeoPoint vertB) {
   return x > pX;
 }
 
-Future request(Uri uri, {bool decode = true, bool allowCached = true}) async {
+Future smhiRequest(Uri uri, {bool decode = true, bool allowCached = true}) async {
   final SMHICache cache = SMHICache();
   if (allowCached) {
     final String? data = cache.read(uri);
@@ -200,8 +178,7 @@ Future request(Uri uri, {bool decode = true, bool allowCached = true}) async {
       return decode ? jsonDecode(data) : data;
     }
   }
-  final http.Response response =
-      await http.get(uri, headers: {"Accept-Encoding": "gzip"});
+  final http.Response response = await http.get(uri, headers: {"Accept-Encoding": "gzip"});
   if (response.statusCode == 200) {
     cache.add(uri, response.body);
     return decode ? jsonDecode(response.body) : response.body;

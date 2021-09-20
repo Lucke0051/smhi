@@ -1,11 +1,24 @@
 import 'package:smhi/src/utilities.dart';
 
+const String _warningsHost = "opendata-download-warnings.smhi.se";
+
 class Warnings {
   late final Version version;
 
   Warnings({
     this.version = Version.two,
   });
+
+  ///Returns the [Alert] with the highest [AlertSeverity]. Causes an exception if [alerts.isEmpty].
+  static Alert highestSeverity(List<Alert> alerts) {
+    Alert? highest;
+    for (final Alert alert in alerts) {
+      if (highest == null || alert.severity.compareTo(highest.severity) == 1) {
+        highest = alert;
+      }
+    }
+    return highest!;
+  }
 
   static AlertSeverity _alertSeverityFromString(String string) {
     switch (string.toLowerCase()) {
@@ -40,23 +53,60 @@ class Warnings {
     return List.generate(split.length, (int index) => split[index].trim());
   }
 
-  List<Alert> alerts() {
-    List<Alert> alerts = List.empty(growable: true);
+  Future<List<Alert>?> alerts() async {
+    final data = await smhiRequest(constructWarningsUri(_warningsHost, version, ["alerts.json"]));
+    if (data != null && data["alert"] != null) {
+      return List.generate(data["alert"].length, (int index) => Alert.fromJson(data["alert"][index]));
+    }
   }
 
-  List<Message> messages() {
-    List<Alert> alerts = List.empty(growable: true);
+  ///Returns one [Message] in a list, for now. SMHI only returns one message object (not an array with one), even though the API seems to indicate that it returns muliple.
+  Future<List<Message>?> messages() async {
+    final data = await smhiRequest(constructWarningsUri(_warningsHost, version, ["messages.json"]));
+    if (data != null && data["message"] != null) {
+      return [
+        Message.fromJson(data["message"]),
+      ];
+    }
   }
 
-  List<District> districts(DistrictType type) {
-    List<Alert> alerts = List.empty(growable: true);
+  ///Returns either all districts or a specific type (land and sea).
+  Future<List<District>?> districts(DistrictType type) async {
+    final data = await smhiRequest(constructWarningsUri(_warningsHost, version, ["districtviews", "${type.value}.json"]));
+    if (data != null && data["district_view"] != null) {
+      return List.generate(data["district_view"].length, (int index) => District.fromJson(data["district_view"][index]));
+    }
   }
+}
+
+Uri constructWarningsUri(String host, Version version, Iterable<String> api, {Map<String, dynamic>? query}) {
+  final List<String> segments = ["api", "version", version.value.toString()];
+  segments.addAll(api);
+  return Uri(
+    host: host,
+    scheme: "https",
+    pathSegments: segments,
+    queryParameters: query,
+  );
 }
 
 enum DistrictType {
   all,
   land,
   sea,
+}
+
+extension DistrictExtension on DistrictType {
+  String get value {
+    switch (this) {
+      case DistrictType.all:
+        return "all";
+      case DistrictType.land:
+        return "land";
+      case DistrictType.sea:
+        return "sea";
+    }
+  }
 }
 
 enum AlertCategory {
@@ -88,6 +138,9 @@ extension AlertSeverityExtension on AlertSeverity {
         return 4;
     }
   }
+
+  ///Returns a negative number if ``this`` is less servere than ``other``, zero if they are equal, and a positive number if ``this`` more servere than ``other``.
+  int compareTo(AlertSeverity other) => other.id.compareTo(id);
 }
 
 class Alert {
@@ -99,10 +152,10 @@ class Alert {
   String descriptionEN;
   String titleSV;
   String titleEN;
+  String headline;
   AlertSeverity severity;
   String web;
   List<String> districts;
-  int color;
 
   Alert(
     this.id,
@@ -113,27 +166,64 @@ class Alert {
     this.descriptionEN,
     this.titleSV,
     this.titleEN,
+    this.headline,
     this.severity,
     this.web,
     this.districts,
-    this.color,
   );
+
+  factory Alert.fromJson(alert) => Alert(
+        alert["identifier"],
+        DateTime.parse(alert["sent"]),
+        DateTime.parse(alert["code"][1].split(" ")[1]),
+        Warnings._alertCategoryFromString(alert["code"][3].split(" ")[1]),
+        alert["info"]["description"],
+        alert["info"]["parameter"][1]["value"],
+        alert["info"]["eventCode"][3]["value"],
+        alert["info"]["eventCode"][0]["value"],
+        alert["info"]["headline"],
+        Warnings._alertSeverityFromString(alert["info"]["severity"]),
+        alert["info"]["web"],
+        Warnings._stringToList(alert["info"]["area"]["areaDesc"]),
+      );
+
+  @override
+  String toString() => titleEN;
 }
 
 class District {
   String id;
-  String sortOrder;
+  int sortOrder;
   DistrictType type;
   String name;
-  dynamic geometry;
+  GeoPoint point;
+  String polygon;
 
   District(
     this.id,
     this.sortOrder,
     this.type,
     this.name,
-    this.geometry,
+    this.point,
+    this.polygon,
   );
+
+  factory District.fromJson(json) => District(json["id"], json["sort_order"], stringToType(json["category"])!, json["name"],
+      GeoPoint.fromStringPoint(json["geometry"]["point"]), json["geometry"]["polygon"]);
+
+  @override
+  String toString() => "ID: $id, name: $name";
+}
+
+DistrictType? stringToType(String string) {
+  switch (string) {
+    case "all":
+      return DistrictType.all;
+    case "land":
+      return DistrictType.land;
+    case "sea":
+      return DistrictType.sea;
+  }
 }
 
 class Message {
@@ -150,4 +240,10 @@ class Message {
     this.onset,
     this.expires,
   );
+
+  factory Message.fromJson(message) => Message(
+      message["id"], message["text"], DateTime.parse(message["time_stamp"]), DateTime.parse(message["onset"]), DateTime.parse(message["expires"]));
+
+  @override
+  String toString() => text.length > 40 ? "${"ID: $id, text: ${text.substring(0, 40)}"}..." : "ID: $id, text: $text";
 }

@@ -16,7 +16,7 @@ class MeteorologicalForecasts {
 
   ///The current forecast approved time (the time the forecast latest was updated).
   Future<DateTime?> get approvedTime async {
-    final json = await request(constructSmhiUri(metfcstHost, category, version, ["approvedtime.json"]));
+    final json = await smhiRequest(constructMetFcstUri(metfcstHost, category, version, ["approvedtime.json"]));
     if (json != null) {
       return DateTime.tryParse(json["referenceTime"]);
     }
@@ -24,7 +24,7 @@ class MeteorologicalForecasts {
 
   ///The valid times for the current forecast. In the answer you get the valid time list.
   Future<List<DateTime>?> get validTime async {
-    final json = await request(constructSmhiUri(metfcstHost, category, version, ["validtime.json"]));
+    final json = await smhiRequest(constructMetFcstUri(metfcstHost, category, version, ["validtime.json"]));
     if (json != null) {
       final List<DateTime> validTime = List.empty(growable: true);
       for (final String time in json["validTime"]) {
@@ -37,7 +37,7 @@ class MeteorologicalForecasts {
 
   ///The valid times for the current multipoint forecast. In the answer you get the valid time list. You can use the list to specify what valid time when getting a [MultiPointForecast] with [multiPointForecast].
   Future<List<DateTime>?> get multiPointValidTime async {
-    final json = await request(constructSmhiUri(metfcstHost, category, version, ["geotype", "multipoint", "validtime.json"]));
+    final json = await smhiRequest(constructMetFcstUri(metfcstHost, category, version, ["geotype", "multipoint", "validtime.json"]));
     if (json != null) {
       final List<DateTime> validTime = List.empty(growable: true);
       for (final String time in json["validTime"]) {
@@ -50,7 +50,7 @@ class MeteorologicalForecasts {
 
   ///The bounding box polygon for the [Forecast] and [MultiPointForecast] area.
   Future<List<GeoPoint>?> getSMHIBounds() async {
-    final String? data = await request(constructSmhiUri(metfcstHost, Category.pmp3g, Version.two, ["geotype", "polygon.json"]), decode: false);
+    final String? data = await smhiRequest(constructMetFcstUri(metfcstHost, Category.pmp3g, Version.two, ["geotype", "polygon.json"]), decode: false);
     if (data != null) {
       return parseGeoJson(data);
     }
@@ -69,8 +69,8 @@ class MeteorologicalForecasts {
   ///}
   ///```
   Future<Forecast?> forecast(GeoPoint point) async {
-    final json = await request(
-      constructSmhiUri(metfcstHost, category, version, [
+    final json = await smhiRequest(
+      constructMetFcstUri(metfcstHost, category, version, [
         "geotype",
         "point",
         "lon",
@@ -94,8 +94,8 @@ class MeteorologicalForecasts {
       {int? downsample}) async {
     final SMHICache cache = SMHICache();
     final DateFormat formatter = DateFormat("yyyyMMdd'T'HHmmss'Z'");
-    final json = await request(
-      constructSmhiUri(
+    final json = await smhiRequest(
+      constructMetFcstUri(
         metfcstHost,
         category,
         version,
@@ -532,4 +532,15 @@ double _mode(List<double> a) {
     }
   }
   return maxValue;
+}
+
+Uri constructMetFcstUri(String host, Category category, Version version, Iterable<String> api, {Map<String, dynamic>? query}) {
+  final List<String> segments = ["api", "category", category.value, "version", version.value.toString()];
+  segments.addAll(api);
+  return Uri(
+    host: host,
+    scheme: "https",
+    pathSegments: segments,
+    queryParameters: query,
+  );
 }

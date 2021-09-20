@@ -1,7 +1,7 @@
 import 'metfcst.dart';
 import 'utilities.dart';
 
-///Caches requests, current default cache duration is 30 minutes.
+///Caches requests, default cache duration is 30 minutes.
 class SMHICache {
   static final SMHICache _smhiCache = SMHICache._internal();
   Map<Uri, CacheBase>? _cache;
@@ -15,8 +15,8 @@ class SMHICache {
 
   ///Gets the geographical boundray from the SMHI Meteorological Forecasts API.
   Future<void> setMetFcstPoints(Category category, Version version) async {
-    final json = await request(
-      constructSmhiUri(
+    final json = await smhiRequest(
+      constructMetFcstUri(
         metfcstHost,
         category,
         version,
@@ -40,8 +40,7 @@ class SMHICache {
     if (_cache!.length >= maxLength) {
       final Map<Uri, CacheBase> map = <Uri, CacheBase>{};
       final List<MapEntry<Uri, CacheBase>> entries = _cache!.entries.toList();
-      entries.sort((MapEntry<Uri, CacheBase> a, MapEntry<Uri, CacheBase> b) =>
-          a.value.compareTo(b.value));
+      entries.sort((MapEntry<Uri, CacheBase> a, MapEntry<Uri, CacheBase> b) => a.value.compareTo(b.value));
       map.addEntries(entries.getRange(0, maxLength - 2));
       _cache = map;
     }
