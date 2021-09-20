@@ -9,6 +9,33 @@ class Warnings {
     this.version = Version.two,
   });
 
+  static District districtAt(GeoPoint at, List<District> districts) {
+    District? closest;
+    double? currentClosestDist;
+    for (int i = 0; i < districts.length; i++) {
+      if (closest == null) {
+        closest = districts[i];
+        currentClosestDist = calculateLatLongDistance(
+          at.latitude,
+          at.longitude,
+          closest.point.latitude,
+          closest.point.longitude,
+        );
+      } else {
+        final double dist = calculateLatLongDistance(
+          at.latitude,
+          at.longitude,
+          districts[i].point.latitude,
+          districts[i].point.longitude,
+        );
+        if (dist < 100 && dist < currentClosestDist) {
+          closest = districts[i];
+        }
+      }
+    }
+    return closest;
+  }
+
   ///Returns the [Alert] with the highest [AlertSeverity]. Causes an exception if [alerts.isEmpty].
   static Alert highestSeverity(List<Alert> alerts) {
     Alert? highest;
@@ -54,18 +81,15 @@ class Warnings {
   }
 
   Future<List<Alert>?> alerts() async {
-    final data = await smhiRequest(
-        constructWarningsUri(_warningsHost, version, ["alerts.json"]));
+    final data = await smhiRequest(constructWarningsUri(_warningsHost, version, ["alerts.json"]));
     if (data != null && data["alert"] != null) {
-      return List.generate(data["alert"].length,
-          (int index) => Alert.fromJson(data["alert"][index]));
+      return List.generate(data["alert"].length, (int index) => Alert.fromJson(data["alert"][index]));
     }
   }
 
   ///Returns one [Message] in a list, for now. SMHI only returns one message object (not an array with one), even though the API seems to indicate that it returns muliple.
   Future<List<Message>?> messages() async {
-    final data = await smhiRequest(
-        constructWarningsUri(_warningsHost, version, ["messages.json"]));
+    final data = await smhiRequest(constructWarningsUri(_warningsHost, version, ["messages.json"]));
     if (data != null && data["message"] != null) {
       return [
         Message.fromJson(data["message"]),
@@ -75,17 +99,14 @@ class Warnings {
 
   ///Returns either all districts or a specific type (land and sea).
   Future<List<District>?> districts(DistrictType type) async {
-    final data = await smhiRequest(constructWarningsUri(
-        _warningsHost, version, ["districtviews", "${type.value}.json"]));
+    final data = await smhiRequest(constructWarningsUri(_warningsHost, version, ["districtviews", "${type.value}.json"]));
     if (data != null && data["district_view"] != null) {
-      return List.generate(data["district_view"].length,
-          (int index) => District.fromJson(data["district_view"][index]));
+      return List.generate(data["district_view"].length, (int index) => District.fromJson(data["district_view"][index]));
     }
   }
 }
 
-Uri constructWarningsUri(String host, Version version, Iterable<String> api,
-    {Map<String, dynamic>? query}) {
+Uri constructWarningsUri(String host, Version version, Iterable<String> api, {Map<String, dynamic>? query}) {
   final List<String> segments = ["api", "version", version.value.toString()];
   segments.addAll(api);
   return Uri(
@@ -214,13 +235,8 @@ class District {
     this.polygon,
   );
 
-  factory District.fromJson(json) => District(
-      json["id"],
-      json["sort_order"],
-      stringToType(json["category"])!,
-      json["name"],
-      GeoPoint.fromStringPoint(json["geometry"]["point"]),
-      json["geometry"]["polygon"]);
+  factory District.fromJson(json) => District(json["id"], json["sort_order"], stringToType(json["category"])!, json["name"],
+      GeoPoint.fromStringPoint(json["geometry"]["point"]), json["geometry"]["polygon"]);
 
   @override
   String toString() => "ID: $id, name: $name";
@@ -253,14 +269,8 @@ class Message {
   );
 
   factory Message.fromJson(message) => Message(
-      message["id"],
-      message["text"],
-      DateTime.parse(message["time_stamp"]),
-      DateTime.parse(message["onset"]),
-      DateTime.parse(message["expires"]));
+      message["id"], message["text"], DateTime.parse(message["time_stamp"]), DateTime.parse(message["onset"]), DateTime.parse(message["expires"]));
 
   @override
-  String toString() => text.length > 40
-      ? "${"ID: $id, text: ${text.substring(0, 40)}"}..."
-      : "ID: $id, text: $text";
+  String toString() => text.length > 40 ? "${"ID: $id, text: ${text.substring(0, 40)}"}..." : "ID: $id, text: $text";
 }
