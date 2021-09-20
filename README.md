@@ -56,6 +56,6 @@ Please file feature requests and bugs at the [issue tracker][tracker].
 
 [tracker]: https://github.com/Lucke0051/smhi/issues
 [pullRequest]: https://github.com/Lucke0051/smhi/pulls
-[smhiDocs]: https://opendata.smhi.se/apidocs/metfcst/index.html
+[smhiDocs]: https://opendata.smhi.se/apidocs/
 [smhiTerms]: https://www.smhi.se/data/oppna-data/information-om-oppna-data/villkor-for-anvandning-1.30622
 [ccLicense]: https://creativecommons.org/licenses/by/4.0/deed
