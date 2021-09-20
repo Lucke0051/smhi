@@ -97,7 +97,9 @@ class GeoPoint {
 
   @override
   bool operator ==(Object other) {
-    return (other is GeoPoint) && other.latitude == latitude && other.longitude == longitude;
+    return (other is GeoPoint) &&
+        other.latitude == latitude &&
+        other.longitude == longitude;
   }
 
   @override
@@ -109,7 +111,8 @@ class GeoPoint {
   int get hashCode => hash2(latitude, longitude);
 }
 
-int hash2(dynamic a, dynamic b) => _finish(_combine(_combine(0, a.hashCode), b.hashCode));
+int hash2(dynamic a, dynamic b) =>
+    _finish(_combine(_combine(0, a.hashCode), b.hashCode));
 
 int _combine(int hash, int value) {
   hash = 0x1fffffff & (hash + value);
@@ -123,10 +126,14 @@ int _finish(int hash) {
   return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
 }
 
-double calculateLatLongDistance(double lat1, double lon1, double lat2, double lon2) {
+double calculateLatLongDistance(
+    double lat1, double lon1, double lat2, double lon2) {
   if (lat1 == lat2 && lon1 == lon2) return 0;
   const double p = 0.017453292519943295;
-  return 12742 * asin(sqrt(0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2));
+  return 12742 *
+      asin(sqrt(0.5 -
+          cos((lat2 - lat1) * p) / 2 +
+          cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2));
 }
 
 List<GeoPoint>? parseGeoJson(String jsonString) {
@@ -134,7 +141,8 @@ List<GeoPoint>? parseGeoJson(String jsonString) {
   final json = jsonDecode(jsonString);
   if (json != null) {
     for (int i = 0; i < json["coordinates"][0].length; i++) {
-      cords.add(GeoPoint(json["coordinates"][0][i][1], json["coordinates"][0][i][0]));
+      cords.add(
+          GeoPoint(json["coordinates"][0][i][1], json["coordinates"][0][i][0]));
     }
   }
   return cords.isEmpty ? null : cords;
@@ -170,7 +178,8 @@ bool _rayCastIntersect(GeoPoint tap, GeoPoint vertA, GeoPoint vertB) {
   return x > pX;
 }
 
-Future smhiRequest(Uri uri, {bool decode = true, bool allowCached = true}) async {
+Future smhiRequest(Uri uri,
+    {bool decode = true, bool allowCached = true}) async {
   final SMHICache cache = SMHICache();
   if (allowCached) {
     final String? data = cache.read(uri);
@@ -178,7 +187,8 @@ Future smhiRequest(Uri uri, {bool decode = true, bool allowCached = true}) async
       return decode ? jsonDecode(data) : data;
     }
   }
-  final http.Response response = await http.get(uri, headers: {"Accept-Encoding": "gzip"});
+  final http.Response response =
+      await http.get(uri, headers: {"Accept-Encoding": "gzip"});
   if (response.statusCode == 200) {
     cache.add(uri, response.body);
     return decode ? jsonDecode(response.body) : response.body;
