@@ -60,7 +60,7 @@ extension UnitExtension on Unit {
       case Unit.category:
         return "Category";
       case Unit.celcius:
-        return "C°";
+        return "°C";
       case Unit.code:
         return "Code";
       case Unit.degree:
