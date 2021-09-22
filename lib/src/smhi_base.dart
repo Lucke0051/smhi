@@ -5,6 +5,7 @@ import 'utilities.dart';
 class SMHICache {
   static final SMHICache _smhiCache = SMHICache._internal();
   Map<Uri, CacheBase>? _cache;
+  final List<Function> _onAddCallbacks = List.empty(growable: true);
   List<GeoPoint>? metFcstPoints;
   Duration maxAge = const Duration(minutes: 30);
   int maxLength = 10;
@@ -45,6 +46,9 @@ class SMHICache {
       _cache = map;
     }
     _cache![uri] = CacheBase(value, DateTime.now());
+    for (final Function function in _onAddCallbacks) {
+      function(uri);
+    }
   }
 
   ///Reads from the cache with the passed `uri`.
@@ -58,6 +62,8 @@ class SMHICache {
       }
     }
   }
+
+  Map<Uri, CacheBase>? get allCached => _cache;
 
   void clear() {
     _cache = null;
@@ -102,6 +108,8 @@ class SMHICache {
       }
     }
   }
+
+  void registerOnAddCallback(Function function) => _onAddCallbacks.add(function);
 }
 
 class CacheBase {
