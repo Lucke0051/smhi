@@ -65,6 +65,7 @@ class SMHICache {
 
   Map<Uri, CacheBase>? get allCached => _cache;
 
+  ///Clears the cache
   void clear() {
     _cache = null;
   }
@@ -109,6 +110,9 @@ class SMHICache {
     }
   }
 
+  ///The [function] passed will be called with the [Uri] of the data added every time data is added to the cache.
+  ///
+  ///The data can then be read by calling [read] with the [Uri].
   void registerOnAddCallback(Function function) => _onAddCallbacks.add(function);
 }
 
