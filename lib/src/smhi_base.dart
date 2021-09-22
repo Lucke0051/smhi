@@ -40,8 +40,7 @@ class SMHICache {
     if (_cache!.length >= maxLength) {
       final Map<Uri, CacheBase> map = <Uri, CacheBase>{};
       final List<MapEntry<Uri, CacheBase>> entries = _cache!.entries.toList();
-      entries.sort((MapEntry<Uri, CacheBase> a, MapEntry<Uri, CacheBase> b) =>
-          a.value.compareTo(b.value));
+      entries.sort((MapEntry<Uri, CacheBase> a, MapEntry<Uri, CacheBase> b) => a.value.compareTo(b.value));
       map.addEntries(entries.getRange(0, maxLength - 2));
       _cache = map;
     }
@@ -63,6 +62,46 @@ class SMHICache {
   void clear() {
     _cache = null;
   }
+
+  Map<String, dynamic> toJson() {
+    final List<Map<String, dynamic>> cacheList = List.empty(growable: true);
+    if (_cache != null) {
+      _cache!.forEach((Uri key, CacheBase value) {
+        cacheList.add({
+          "u": key.toString(),
+          "b": value.toJson(),
+        });
+      });
+    }
+    return {
+      "at": DateTime.now().toUtc().millisecondsSinceEpoch,
+      "mfcp": metFcstPoints != null
+          ? List.generate(
+              metFcstPoints!.length,
+              (int index) => {
+                "lat": metFcstPoints![index].latitude,
+                "lon": metFcstPoints![index].longitude,
+              },
+            )
+          : null,
+      "c": cacheList,
+    };
+  }
+
+  void fromJson(Map<String, dynamic> json, {Duration? maxAge}) {
+    final Duration age = Duration(milliseconds: DateTime.now().toUtc().millisecondsSinceEpoch - json["at"] as int);
+    if (maxAge == null || age < maxAge) {
+      if (json["mfcp"] != null) {
+        metFcstPoints = List.generate(json["mfcp"].length, (int index) => GeoPoint(json["mfcp"][index]["lat"], json["mfcp"][index]["lon"]));
+      }
+      if (json["c"] != null) {
+        _cache ??= {};
+        for (final Map<String, dynamic> map in json["c"]) {
+          _cache![Uri.parse(map["u"])] = map["b"];
+        }
+      }
+    }
+  }
 }
 
 class CacheBase {
@@ -74,4 +113,8 @@ class CacheBase {
   CacheBase(this.data, this.added);
 
   int compareTo(CacheBase other) => added.compareTo(other.added);
+
+  Map<String, String> toJson() => {"a": added.toIso8601String(), "d": data};
+
+  factory CacheBase.fromJson(Map<String, String> json) => CacheBase(json["a"]!, DateTime.parse(json["d"]!));
 }
