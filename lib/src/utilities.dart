@@ -1,10 +1,12 @@
+// ignore_for_file: parameter_assignments
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
-import 'smhi_base.dart';
+import 'package:smhi/src/smhi_base.dart';
 
 ///SMHI API category.
 enum Category {
