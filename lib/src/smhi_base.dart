@@ -1,5 +1,7 @@
-import 'metfcst.dart';
-import 'utilities.dart';
+// ignore_for_file: avoid_dynamic_calls
+
+import 'package:smhi/src/metfcst.dart';
+import 'package:smhi/src/utilities.dart';
 
 ///Caches requests, default cache duration is 30 minutes.
 class SMHICache {
@@ -61,6 +63,7 @@ class SMHICache {
         _cache!.remove(uri);
       }
     }
+    return null;
   }
 
   Map<Uri, CacheBase>? get allCached => _cache;

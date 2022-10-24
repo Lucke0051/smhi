@@ -1,6 +1,8 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'package:intl/intl.dart';
-import 'smhi_base.dart';
-import 'utilities.dart';
+import 'package:smhi/src/smhi_base.dart';
+import 'package:smhi/src/utilities.dart';
 
 /// The SMHI Open Data Meteorological Forecasts API host.
 const String metfcstHost = "opendata-download-metfcst.smhi.se";
@@ -20,6 +22,7 @@ class MeteorologicalForecasts {
     if (json != null) {
       return DateTime.tryParse(json["referenceTime"]);
     }
+    return null;
   }
 
   ///The valid times for the current forecast. In the answer you get the valid time list.
@@ -33,6 +36,7 @@ class MeteorologicalForecasts {
       }
       return validTime;
     }
+    return null;
   }
 
   ///The valid times for the current multipoint forecast. In the answer you get the valid time list. You can use the list to specify what valid time when getting a [MultiPointForecast] with [multiPointForecast].
@@ -46,6 +50,7 @@ class MeteorologicalForecasts {
       }
       return validTime;
     }
+    return null;
   }
 
   ///The bounding box polygon for the [Forecast] and [MultiPointForecast] area.
@@ -54,6 +59,7 @@ class MeteorologicalForecasts {
     if (data != null) {
       return parseGeoJson(data);
     }
+    return null;
   }
 
   ///Returns a complete [Forecast] approximately 10 days ahead of the latest current forecast. All times in the answer given in UTC.
@@ -84,6 +90,7 @@ class MeteorologicalForecasts {
     if (json != null) {
       return Forecast.fromJson(json);
     }
+    return null;
   }
 
   ///Returns a [MultiPointForecast] which contains a forecast for all grid points with the specified [parameter], [levelType] and [level].
@@ -91,8 +98,14 @@ class MeteorologicalForecasts {
   ///The parameter [downsample] allows an integer between 0-20. A downsample value of 2 means that every other value horizontally and vertically is displayed.
   ///
   ///`points` are automatically stored in the [SMHICache] if there is no `points` there already.
-  Future<MultiPointForecast?> multiPointForecast(DateTime validTime, MetFcstParameter parameter, MetFcstLevelType levelType, int level,
-      {int? downsample, bool allowCached = true}) async {
+  Future<MultiPointForecast?> multiPointForecast(
+    DateTime validTime,
+    MetFcstParameter parameter,
+    MetFcstLevelType levelType,
+    int level, {
+    int? downsample,
+    bool allowCached = true,
+  }) async {
     final SMHICache cache = SMHICache();
     final DateFormat formatter = DateFormat("yyyyMMdd'T'HHmmss'Z'");
     final json = await smhiRequest(
@@ -129,6 +142,7 @@ class MeteorologicalForecasts {
       }
       return MultiPointForecast.fromJson(json);
     }
+    return null;
   }
 
   static MetFcstParameter? toParameter(String string) {
@@ -172,6 +186,7 @@ class MeteorologicalForecasts {
       case "Wsymb2":
         return MetFcstParameter.weatherSymbol;
     }
+    return null;
   }
 }
 

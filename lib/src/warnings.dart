@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'package:smhi/src/utilities.dart';
 
 const String _warningsHost = "opendata-download-warnings.smhi.se";
@@ -87,6 +89,7 @@ class Warnings {
     if (data != null && data["alert"] != null) {
       return List.generate(data["alert"].length, (int index) => Alert.fromJson(data["alert"][index]));
     }
+    return null;
   }
 
   ///Returns one [Message] in a list, for now. SMHI only returns one message object (not an array with one), even though the API seems to indicate that it returns muliple.
@@ -97,6 +100,7 @@ class Warnings {
         Message.fromJson(data["message"]),
       ];
     }
+    return null;
   }
 
   ///Returns either all districts or a specific type (land and sea).
@@ -105,6 +109,7 @@ class Warnings {
     if (data != null && data["district_view"] != null) {
       return List.generate(data["district_view"].length, (int index) => District.fromJson(data["district_view"][index]));
     }
+    return null;
   }
 }
 
@@ -237,8 +242,14 @@ class District {
     this.polygon,
   );
 
-  factory District.fromJson(json) => District(json["id"], json["sort_order"], stringToType(json["category"])!, json["name"],
-      GeoPoint.fromStringPoint(json["geometry"]["point"]), json["geometry"]["polygon"]);
+  factory District.fromJson(json) => District(
+        json["id"],
+        json["sort_order"],
+        stringToType(json["category"])!,
+        json["name"],
+        GeoPoint.fromStringPoint(json["geometry"]["point"]),
+        json["geometry"]["polygon"],
+      );
 
   @override
   String toString() => "ID: $id, name: $name";
@@ -253,6 +264,7 @@ DistrictType? stringToType(String string) {
     case "sea":
       return DistrictType.sea;
   }
+  return null;
 }
 
 class Message {
@@ -271,7 +283,12 @@ class Message {
   );
 
   factory Message.fromJson(message) => Message(
-      message["id"], message["text"], DateTime.parse(message["time_stamp"]), DateTime.parse(message["onset"]), DateTime.parse(message["expires"]));
+        message["id"],
+        message["text"],
+        DateTime.parse(message["time_stamp"]),
+        DateTime.parse(message["onset"]),
+        DateTime.parse(message["expires"]),
+      );
 
   @override
   String toString() => text.length > 40 ? "${"ID: $id, text: ${text.substring(0, 40)}"}..." : "ID: $id, text: $text";
